@@ -15,4 +15,8 @@
     <string name="achievement_crashed">CgkIs5O1_rgIEAIQBg</string>
     <string name="leaderboard_score">CgkIs5O1_rgIEAIQAQ</string>
     <string name="signin_other_error">Sign in Error</string>
+
+
+    <string name="finishscenead">ca-app-pub-6422069964904185/4153456950</string>
+    <string name="interstitial">ca-app-pub-6422069964904185/3477302555</string>
 </resources>

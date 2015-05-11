@@ -11,6 +11,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Joint;
+import com.google.android.gms.ads.InterstitialAd;
 
 import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
@@ -48,6 +49,7 @@ public class SceneManager {
     Body body;
     Text SCORE,HighScore,PrevScore,speed,prevSpeed,highspeed;
     int current_speed=0;
+    private InterstitialAd interstitial;
     int score=0;
     int PAUSE_FLAG=0;
     Sprite PlayOrRetryButton;
@@ -145,6 +147,12 @@ public class SceneManager {
     }
     public Scene createFinishScene(){
         finishscene = new Scene();
+        SharedPreferences.Editor editor = activity.getSharedPreferences("GAME", 0).edit();
+        editor.putString("Adview", "true");
+        editor.commit();
+        SharedPreferences.Editor editorAd = activity.getSharedPreferences("AD", 0).edit();
+        editorAd.putString("InterstitialAd","true");
+        editorAd.commit();
         finishscene.setBackground(new Background(Color.BLACK));
         Sprite StarBgFinishScene = new Sprite(0,0,playerTextureRegionBg,engine.getVertexBufferObjectManager());
         finishscene.attachChild(StarBgFinishScene);
@@ -181,6 +189,9 @@ public class SceneManager {
         return finishscene;
     }
     public Scene createSplashScene(){
+        SharedPreferences.Editor editor = activity.getSharedPreferences("GAME", 0).edit();
+        editor.putString("Adview", "true");
+        editor.commit();
         splashScene = new Scene();
         splashScene.setBackground(new Background(0,0,0));
         Sprite SplashImage = new Sprite(0,0,splashTR,engine.getVertexBufferObjectManager());
@@ -189,6 +200,12 @@ public class SceneManager {
         return splashScene;
     }
     public Scene createMenuScene(){
+        SharedPreferences.Editor editor = activity.getSharedPreferences("GAME", 0).edit();
+        editor.putString("Adview", "false");
+        editor.commit();
+        SharedPreferences.Editor editorAd = activity.getSharedPreferences("AD", 0).edit();
+        editorAd.putString("InterstitialAd","true");
+        editorAd.commit();
         menuScene = new Scene();
         menuScene.setBackground(new Background(Color.BLACK));
         Sprite bg = new Sprite(0,0,playerTextureRegionBg,engine.getVertexBufferObjectManager());
@@ -226,10 +243,18 @@ public class SceneManager {
         menuScene.attachChild(share);
         menuScene.registerTouchArea(rate);
         menuScene.registerTouchArea(share);
+
         return menuScene;
     }
     public Scene createGameScene(){
         gameScene = new Scene();
+        SharedPreferences.Editor editor = activity.getSharedPreferences("GAME", 0).edit();
+        editor.putString("Adview", "false");
+
+        editor.commit();
+        SharedPreferences.Editor editorAd = activity.getSharedPreferences("AD", 0).edit();
+        editorAd.putString("InterstitialAd","false");
+        editorAd.commit();
         gameScene.setBackground(new Background(Color.BLACK));
         greenarea = new Rectangle(CAMERA_WIDTH,0,10,CAMERA_HEIGHT,engine.getVertexBufferObjectManager());
         physicsWorld = new PhysicsWorld(new Vector2(0, 0),false);
