@@ -1,0 +1,3 @@
+include ':app', ':BaseGameUtils'
+include ':andEngine'
+include ':andEnginePhysicsBox2DExtension'
