@@ -45,17 +45,25 @@ public class Rate extends Sprite {
                         act.startActivityForResult(Games.Leaderboards.getAllLeaderboardsIntent(MainActivity.mGoogleApiClient),
                                 MainActivity.RC_UNUSED);
                     } else {
-
+                        MainActivity.googleConnect((MainActivity)act);
                        // BaseGameUtils.makeSimpleDialog(act, act.getString(R.string.leaderboards_not_available)).show();
                     }
                 }
                     break;
-                case 1:Intent textShareIntent = new Intent(Intent.ACTION_SEND);
+                case 1:
+                    if (MainActivity.isSignedIn()) {
+                        act.startActivityForResult(Games.Achievements.getAchievementsIntent(MainActivity.mGoogleApiClient),
+                                MainActivity.RC_UNUSED);
+                    } else {
+                        MainActivity.googleConnect((MainActivity)act);
+                        // BaseGameUtils.makeSimpleDialog(act, act.getString(R.string.leaderboards_not_available)).show();
+                    }
+                    break;
+                case 2://leaderboard
+                    Intent textShareIntent = new Intent(Intent.ACTION_SEND);
                     textShareIntent.putExtra(Intent.EXTRA_TEXT, " https://play.google.com/store/apps/details?id-com. ");
                     textShareIntent.setType("text/plain");
                     act.startActivity(Intent.createChooser(textShareIntent, "Share with..."));
-                    break;
-                case 2://leaderboard
                     break;
             }
         }

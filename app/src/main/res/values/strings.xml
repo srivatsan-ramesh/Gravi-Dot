@@ -8,12 +8,28 @@
     <string name="leaderboards_not_available">Leaderboards Not Available</string>
     <integer name="google_play_services_version">7327000</integer>
     <string name="app_id">290175404467</string>
+
+  <!--score ach. -->
     <string name="achievement_beginner">CgkIs5O1_rgIEAIQAg</string>
-    <string name="achievement_god_speed">CgkIs5O1_rgIEAIQAw</string>
-    <string name="achievement_dot_master">CgkIs5O1_rgIEAIQBA</string>
     <string name="achievement_pro">CgkIs5O1_rgIEAIQBQ</string>
+  <!--***************************************************-->
+
+  <!--speed ach. -->
+    <string name="achievement_god_speed">CgkIs5O1_rgIEAIQAw</string>
+  <!--***************************************************-->
+
+  <!--dot ach. -->
+    <string name="achievement_dot_master">CgkIs5O1_rgIEAIQBA</string>
+  <!--**************************************************-->
+
+  <!--gen_ach.-->
     <string name="achievement_crashed">CgkIs5O1_rgIEAIQBg</string>
+  <!--***************************************************-->
+
     <string name="leaderboard_score">CgkIs5O1_rgIEAIQAQ</string>
+    <string name="leaderboard_speed">CgkIs5O1_rgIEAIQCA</string>
+
+
     <string name="signin_other_error">Sign in Error</string>
 
 

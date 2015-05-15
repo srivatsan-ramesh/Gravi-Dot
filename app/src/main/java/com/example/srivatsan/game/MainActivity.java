@@ -14,7 +14,12 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.GamesActivityResultCodes;
+import com.google.android.gms.games.GamesStatusCodes;
+import com.google.android.gms.games.leaderboard.LeaderboardVariant;
+import com.google.android.gms.games.leaderboard.Leaderboards;
 import com.google.android.gms.plus.Plus;
 import com.google.example.games.basegameutils.BaseGameUtils;
 
@@ -42,7 +47,7 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
     private InterstitialAd interstitial;
     protected static final int CAMERA_WIDTH = 800;
     protected static final int CAMERA_HEIGHT = 480;
-    protected static int AD_INTERVAL = 20 ; // in seconds
+    protected static int AD_INTERVAL = 40 ; // in seconds
     // Client used to interact with Google APIs
     public static GoogleApiClient mGoogleApiClient;
     SharedPreferences.OnSharedPreferenceChangeListener BannerListener,InterstitialListener;
@@ -268,17 +273,20 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
         PhysicsFactory.createBoxBody(physicsWorld, wall3, BodyDef.BodyType.StaticBody, WALL_FIX);
         scene.attachChild(wall3);*/
     }
-
-    @Override
-    public void onPopulateScene(Scene pScene, OnPopulateSceneCallback pOnPopulateSceneCallback) throws Exception {
-        /**/
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
+    public static void googleConnect(MainActivity m){
+        mGoogleApiClient = new GoogleApiClient.Builder(m)
+                .addConnectionCallbacks(m)
+                .addOnConnectionFailedListener(m)
                 .addApi(Plus.API).addScope(Plus.SCOPE_PLUS_LOGIN)
                 .addApi(Games.API).addScope(Games.SCOPE_GAMES)
                 .build();
         mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onPopulateScene(Scene pScene, OnPopulateSceneCallback pOnPopulateSceneCallback) throws Exception {
+        /**/
+        googleConnect(this);
         // load outbox from file
         mOutbox.loadLocal(this);
         sceneManager.loadGameResources();
@@ -289,19 +297,30 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
 
     @Override
     public void onConnected(Bundle bundle) {
-        mEngine.registerUpdateHandler(new TimerHandler(1f,new ITimerCallback() {
-                    @Override
-                    public void onTimePassed(TimerHandler pTimerHandler) {
-                        mEngine.unregisterUpdateHandler(pTimerHandler);
-                        sceneManager.createMenuScene();
-                        sceneManager.setCurrentScene(SceneManager.AllScenes.MENU);
+        if(sceneManager.getCurrentScene()== SceneManager.AllScenes.MENU || sceneManager.getCurrentScene()== SceneManager.AllScenes.FINISH){
+            SharedPreferences sharedPref = getSharedPreferences("GAME",0);
+            int hs = Integer.parseInt(sharedPref.getString("HighScore", -1 + ""));
+            int hv = Integer.parseInt(sharedPref.getString("HighSpeed", -1 + ""));
+            if(hs==-1){
+                loadScoreOfLeaderBoard();
+            }
+            if(hv==-1){
+                loadScoreOfLeaderBoardSpeed();
+            }
+        }
+        else{
+            SharedPreferences sharedPref = getSharedPreferences("GAME",0);
+            int hs = Integer.parseInt(sharedPref.getString("HighScore", -1 + ""));
+            int hv = Integer.parseInt(sharedPref.getString("HighSpeed", -1 + ""));
+            if(hs==-1){
+                loadScoreOfLeaderBoard();
+            }
+            if(hv==-1){
+                loadScoreOfLeaderBoardSpeed();
+            }
+            startGame();
 
-
-                        //sceneManager.loadMenuResources();
-                    }
-                })
-        );
-        displayInterstitial();
+        }
     }
 
     @Override
@@ -383,8 +402,20 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
             if (resultCode == RESULT_OK) {
                 mGoogleApiClient.connect();
             } else {
-                BaseGameUtils.showActivityResultError(this, requestCode, resultCode, R.string.signin_other_error);
+                mGoogleApiClient=null;
+                mAutoStartSignInFlow = true;
+                mSignInClicked = true;
+                mResolvingConnectionFailure = false;
+                startGame();
             }
+        }
+        else if (requestCode == RC_UNUSED
+                && resultCode == GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED) {
+            mGoogleApiClient=null;
+            mAutoStartSignInFlow = true;
+            mSignInClicked = true;
+            mResolvingConnectionFailure = false;
+            // update your logic here (show login btn, hide logout btn).
         }
     }
     @Override
@@ -395,5 +426,59 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
     @Override
     protected int getRenderSurfaceViewID() {
         return R.id.SurfaceViewId;
+    }
+    @Override
+    protected void onPause(){
+        super.onPause();
+        SharedPreferences.Editor editorAd = getSharedPreferences("AD", 0).edit();
+        editorAd.putString("InterstitialAd","false");
+        editorAd.commit();
+    }
+    public void startGame(){
+        mEngine.registerUpdateHandler(new TimerHandler(1f,new ITimerCallback() {
+                    @Override
+                    public void onTimePassed(TimerHandler pTimerHandler) {
+                        mEngine.unregisterUpdateHandler(pTimerHandler);
+                        sceneManager.createMenuScene();
+                        sceneManager.setCurrentScene(SceneManager.AllScenes.MENU);
+
+                    }
+                })
+        );
+        displayInterstitial();
+    }
+    private void loadScoreOfLeaderBoard() {
+        Games.Leaderboards.loadCurrentPlayerLeaderboardScore(mGoogleApiClient, getString(R.string.leaderboard_score), LeaderboardVariant.TIME_SPAN_ALL_TIME, LeaderboardVariant.COLLECTION_PUBLIC).setResultCallback(new ResultCallback<Leaderboards.LoadPlayerScoreResult>() {
+            @Override
+            public void onResult(final Leaderboards.LoadPlayerScoreResult scoreResult) {
+                if (isScoreResultValid(scoreResult)) {
+                    // here you can get the score like this
+                    //mPoints = scoreResult.getScore().getRawScore();
+                    SharedPreferences example = getSharedPreferences("GAME", 0);
+                    SharedPreferences.Editor editor = example.edit();
+                    editor.putString("HighScore", scoreResult.getScore().getRawScore() + "");
+                    editor.commit();
+                }
+            }
+        });
+    }
+
+    private boolean isScoreResultValid(final Leaderboards.LoadPlayerScoreResult scoreResult) {
+        return scoreResult != null && GamesStatusCodes.STATUS_OK == scoreResult.getStatus().getStatusCode() && scoreResult.getScore() != null;
+    }
+    private void loadScoreOfLeaderBoardSpeed() {
+        Games.Leaderboards.loadCurrentPlayerLeaderboardScore(mGoogleApiClient, getString(R.string.leaderboard_speed), LeaderboardVariant.TIME_SPAN_ALL_TIME, LeaderboardVariant.COLLECTION_PUBLIC).setResultCallback(new ResultCallback<Leaderboards.LoadPlayerScoreResult>() {
+            @Override
+            public void onResult(final Leaderboards.LoadPlayerScoreResult scoreResult) {
+                if (isScoreResultValid(scoreResult)) {
+                    // here you can get the score like this
+                    //mPoints = scoreResult.getScore().getRawScore();
+                    SharedPreferences example = getSharedPreferences("GAME", 0);
+                    SharedPreferences.Editor editor = example.edit();
+                    editor.putString("HighSpeed", scoreResult.getScore().getRawScore() + "");
+                    editor.commit();
+                }
+            }
+        });
     }
 }

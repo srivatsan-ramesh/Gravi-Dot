@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="/home/srivatsan/Desktop/Gravi-Dot/andEngine/src/main/res"/><source path="/home/srivatsan/Desktop/Gravi-Dot/andEngine/build/generated/res/rs/debug"/><source path="/home/srivatsan/Desktop/Gravi-Dot/andEngine/build/generated/res/generated/debug"/></dataSet><dataSet config="debug"><source path="/home/srivatsan/Desktop/Gravi-Dot/andEngine/src/debug/res"/></dataSet><mergedItems/></merger>

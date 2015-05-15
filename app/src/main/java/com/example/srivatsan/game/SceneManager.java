@@ -192,6 +192,9 @@ public class SceneManager {
         SharedPreferences.Editor editor = activity.getSharedPreferences("GAME", 0).edit();
         editor.putString("Adview", "true");
         editor.commit();
+        SharedPreferences.Editor editorAd = activity.getSharedPreferences("AD", 0).edit();
+        editorAd.putString("InterstitialAd","true");
+        editorAd.commit();
         splashScene = new Scene();
         splashScene.setBackground(new Background(0,0,0));
         Sprite SplashImage = new Sprite(0,0,splashTR,engine.getVertexBufferObjectManager());
@@ -466,6 +469,8 @@ public class SceneManager {
                                         sprite.setPosition(-20,-20);*/
                                     double r = Math.sqrt(Math.pow((Gravi.getX() - sprite.getX() - 16), 2) + Math.pow((Gravi.getY() - sprite.getY() - 16), 2));
                                     if (sprite.collidesWith(Gravi) && r <= 48) {
+                                        Achievements a = new Achievements(MainActivity.mGoogleApiClient,activity);
+                                        a.unlockCrashed();
                                         engine.stop();
                                         /*Vibrator v = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
                                         // Vibrate for 500 milliseconds
@@ -537,9 +542,21 @@ public class SceneManager {
         int hv = Integer.parseInt(sharedPref.getString("HighSpeed", 0 + ""));
         if(hs<score){
             hs=score;
+            if(MainActivity.isSignedIn()){
+                Achievements a = new Achievements(MainActivity.mGoogleApiClient,activity);
+                a.unlockScore(hs);
+                Leaderboards l = new Leaderboards(MainActivity.mGoogleApiClient,activity);
+                l.postScore(hs);
+            }
         }
         if(hv<current_speed){
             hv=current_speed;
+            if(MainActivity.isSignedIn()){
+                Achievements a = new Achievements(MainActivity.mGoogleApiClient,activity);
+                a.unlockSpeed(hv);
+                Leaderboards l = new Leaderboards(MainActivity.mGoogleApiClient,activity);
+                l.postSpeed(hv);
+            }
         }
         SharedPreferences example = activity.getSharedPreferences("GAME", 0);
         SharedPreferences.Editor editor = example.edit();
@@ -558,6 +575,9 @@ public class SceneManager {
         setCurrentScene(AllScenes.FINISH);
 
     }
+
+
+
     public void resetPhysics() {
         physicsWorld.getPhysicsConnectorManager().clear();
 
