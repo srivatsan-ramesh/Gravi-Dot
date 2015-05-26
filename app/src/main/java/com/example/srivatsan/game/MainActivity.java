@@ -319,7 +319,6 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
         }
         else{
             startGame();
-
         }
     }
 
