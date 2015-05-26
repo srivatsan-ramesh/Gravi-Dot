@@ -8,6 +8,7 @@ import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.View;
 
+import com.flatearth.gravidot.R;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -24,8 +25,6 @@ import com.google.android.gms.plus.Plus;
 import com.google.example.games.basegameutils.BaseGameUtils;
 
 import org.andengine.engine.camera.Camera;
-import org.andengine.engine.handler.timer.ITimerCallback;
-import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
@@ -40,14 +39,15 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
     Text PauseTimerText;
     Rectangle greenarea,wall1,wall2,wall3;
     Sprite Gravi;
-    Font TextFont;
+    Font TextFontMedium;
     int Start=0;*/
+    public static String PACKAGE_NAME;
     public static Context c;
     SceneManager sceneManager;
     private InterstitialAd interstitial;
     protected static final int CAMERA_WIDTH = 800;
     protected static final int CAMERA_HEIGHT = 480;
-    protected static int AD_INTERVAL = 40 ; // in seconds
+    protected static int AD_INTERVAL = 50 ; // in seconds
     // Client used to interact with Google APIs
     public static GoogleApiClient mGoogleApiClient;
     SharedPreferences.OnSharedPreferenceChangeListener BannerListener,InterstitialListener;
@@ -66,7 +66,7 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
     static AdView adView;
     // tag for debug logging
     final String TAG = "TanC";
-
+    static int i=0;
     // achievements and scores we're pending to push to the cloud
     // (waiting for the user to sign in, for instance)
     AccomplishmentsOutbox mOutbox = new AccomplishmentsOutbox();
@@ -81,7 +81,7 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
         //setContentView(R.layout.activity_main);
         Log.d("oncreate()","entered");
         adView = (AdView) this.findViewById(R.id.adView);
-
+        PACKAGE_NAME=getPackageName();
         // Request for Ads
         AdRequest adRequest = new AdRequest.Builder()
 
@@ -138,6 +138,7 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
             public void onAdFailedToLoad(int errorCode) {
                 // TODO Auto-generated method stub
                 super.onAdFailedToLoad(errorCode);
+                Log.d("Interstirial","failed");
                 displayInterstitial();
 
             }
@@ -145,6 +146,7 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
             public void onAdClosed() {
                 // TODO Auto-generated method stub
                 super.onAdClosed();
+                Log.d("Interstitial","closed");
                 displayInterstitial();
             }
 
@@ -158,7 +160,6 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
             public void onTick(long millisUntilFinished) {
 
             }
-
             @Override
             public void onFinish() {
                 dispAddAfterTimer();
@@ -230,6 +231,9 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
     @Override
     protected void onResume(){
         super.onResume();
+        SharedPreferences.Editor editorAd = getSharedPreferences("AD", 0).edit();
+        editorAd.putString("InterstitialAd","true");
+        editorAd.commit();
         //onShowLeaderboardsRequested();
     }
 
@@ -245,7 +249,7 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
         mEngine.registerUpdateHandler(new FPSLogger());
         createWalls();
         crateRect();
-        PauseTimerText = new Text(100, 40, this.TextFont, "", new TextOptions(HorizontalAlign.CENTER), this.getVertexBufferObjectManager());
+        PauseTimerText = new Text(100, 40, this.TextFontMedium, "", new TextOptions(HorizontalAlign.CENTER), this.getVertexBufferObjectManager());
         PauseTimerText.setColor(15,50,0);
         scene.attachChild(PauseTimerText);*/
         pOnCreateSceneCallback.onCreateSceneFinished(sceneManager.createSplashScene());
@@ -297,27 +301,23 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
 
     @Override
     public void onConnected(Bundle bundle) {
+        PushOnConnection p = new PushOnConnection(mGoogleApiClient,this);
+        SharedPreferences sharedPref = getSharedPreferences("GAME",0);
+        int hs = Integer.parseInt(sharedPref.getString("HighScore", -1 + ""));
+        int hv = Integer.parseInt(sharedPref.getString("HighSpeed", -1 + ""));
+        SharedPreferences.Editor e = sharedPref.edit();
+        e.putString("SignedIn","true");
+        e.commit();
+        if(hs==-1){
+            loadScoreOfLeaderBoard();
+        }
+        if(hv==-1){
+            loadScoreOfLeaderBoardSpeed();
+        }
         if(sceneManager.getCurrentScene()== SceneManager.AllScenes.MENU || sceneManager.getCurrentScene()== SceneManager.AllScenes.FINISH){
-            SharedPreferences sharedPref = getSharedPreferences("GAME",0);
-            int hs = Integer.parseInt(sharedPref.getString("HighScore", -1 + ""));
-            int hv = Integer.parseInt(sharedPref.getString("HighSpeed", -1 + ""));
-            if(hs==-1){
-                loadScoreOfLeaderBoard();
-            }
-            if(hv==-1){
-                loadScoreOfLeaderBoardSpeed();
-            }
+
         }
         else{
-            SharedPreferences sharedPref = getSharedPreferences("GAME",0);
-            int hs = Integer.parseInt(sharedPref.getString("HighScore", -1 + ""));
-            int hv = Integer.parseInt(sharedPref.getString("HighSpeed", -1 + ""));
-            if(hs==-1){
-                loadScoreOfLeaderBoard();
-            }
-            if(hv==-1){
-                loadScoreOfLeaderBoardSpeed();
-            }
             startGame();
 
         }
@@ -344,6 +344,10 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
             if (!BaseGameUtils.resolveConnectionFailure(this, mGoogleApiClient, connectionResult,
                     RC_SIGN_IN, getString(R.string.signin_other_error))) {
                 mResolvingConnectionFailure = false;
+                BaseGameUtils.makeSimpleDialog(this, "Failed to sign in. Please check your network connection and try again.").show();
+                SharedPreferences.Editor e = getSharedPreferences("GAME",0).edit();
+                e.putString("SignedIn","false");
+                e.commit();
             }
         }
     }
@@ -406,7 +410,15 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
                 mAutoStartSignInFlow = true;
                 mSignInClicked = true;
                 mResolvingConnectionFailure = false;
-                startGame();
+                if(sceneManager.getCurrentScene()== SceneManager.AllScenes.MENU || sceneManager.getCurrentScene()== SceneManager.AllScenes.FINISH){
+
+                }
+                else {
+                    SharedPreferences.Editor e = getSharedPreferences("GAME",0).edit();
+                    e.putString("SignedIn","false");
+                    e.commit();
+                    startGame();
+                }
             }
         }
         else if (requestCode == RC_UNUSED
@@ -435,17 +447,13 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
         editorAd.commit();
     }
     public void startGame(){
-        mEngine.registerUpdateHandler(new TimerHandler(1f,new ITimerCallback() {
-                    @Override
-                    public void onTimePassed(TimerHandler pTimerHandler) {
-                        mEngine.unregisterUpdateHandler(pTimerHandler);
-                        sceneManager.createMenuScene();
-                        sceneManager.setCurrentScene(SceneManager.AllScenes.MENU);
 
-                    }
-                })
-        );
-        displayInterstitial();
+        sceneManager.createMenuScene();
+        sceneManager.setCurrentScene(SceneManager.AllScenes.MENU);
+        if(i==0) {
+            displayInterstitial();
+            i=1;
+        }
     }
     private void loadScoreOfLeaderBoard() {
         Games.Leaderboards.loadCurrentPlayerLeaderboardScore(mGoogleApiClient, getString(R.string.leaderboard_score), LeaderboardVariant.TIME_SPAN_ALL_TIME, LeaderboardVariant.COLLECTION_PUBLIC).setResultCallback(new ResultCallback<Leaderboards.LoadPlayerScoreResult>() {

@@ -10,21 +10,48 @@
     <string name="app_id">290175404467</string>
 
   <!--score ach. -->
-    <string name="achievement_beginner">CgkIs5O1_rgIEAIQAg</string>
-    <string name="achievement_pro">CgkIs5O1_rgIEAIQBQ</string>
+    <string name="achievement_the_beginners_club">CgkIs5O1_rgIEAIQAg</string>
+    <string name="achievement_the_five_squared_club">CgkIs5O1_rgIEAIQCQ</string>
+    <string name="achievement_the_century_club">CgkIs5O1_rgIEAIQBQ</string>
+
   <!--***************************************************-->
 
   <!--speed ach. -->
+    <string name="achievement_slow_is_better">CgkIs5O1_rgIEAIQDQ</string>
+    <string name="achievement_excessive_speeding_ticket">CgkIs5O1_rgIEAIQCg</string>
     <string name="achievement_god_speed">CgkIs5O1_rgIEAIQAw</string>
   <!--***************************************************-->
 
-  <!--dot ach. -->
-    <string name="achievement_dot_master">CgkIs5O1_rgIEAIQBA</string>
-  <!--**************************************************-->
+  <!--crash_ach.-->
+    <string name="achievement_ouch_that_was_a_bad_hit">CgkIs5O1_rgIEAIQBg</string>
+    <string name="achievement_smooth_as_silk">CgkIs5O1_rgIEAIQDg</string>
+    <string name="achievement_well_timed_hit">CgkIs5O1_rgIEAIQCw</string>
+    <string name="achievement_high_speed_crash">CgkIs5O1_rgIEAIQDA</string>
 
-  <!--gen_ach.-->
-    <string name="achievement_crashed">CgkIs5O1_rgIEAIQBg</string>
   <!--***************************************************-->
+
+    <!--publicity_ach.-->
+    <string name="achievement_socialite">CgkIs5O1_rgIEAIQDw</string>
+    <string name="achievement_gravirated">CgkIs5O1_rgIEAIQEA</string>
+
+    <!--*************************************************-->
+
+
+    <!--crossing dots_ach.-->
+    <string name="achievement_clear_pass">CgkIs5O1_rgIEAIQEQ</string>
+    <string name="achievement_cruising_like_a_boss">CgkIs5O1_rgIEAIQEg</string>
+    <string name="achievement_the_sky_is_the_lower_limit">CgkIs5O1_rgIEAIQEw</string>
+
+    <!--************************************************-->
+
+    <!--played_games_ach.-->
+    <string name="achievement_10_games">CgkIs5O1_rgIEAIQFg</string>
+    <string name="achievement_50_games">CgkIs5O1_rgIEAIQFw</string>
+    <string name="achievement_100_games">CgkIs5O1_rgIEAIQGA</string>
+    <string name="achievement_200_games">CgkIs5O1_rgIEAIQGg</string>
+    <string name="achievement_1000_games">CgkIs5O1_rgIEAIQGw</string>
+    <!--************************************************-->
+
 
     <string name="leaderboard_score">CgkIs5O1_rgIEAIQAQ</string>
     <string name="leaderboard_speed">CgkIs5O1_rgIEAIQCA</string>

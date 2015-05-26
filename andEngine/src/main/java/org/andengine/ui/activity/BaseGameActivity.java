@@ -1,5 +1,14 @@
 package org.andengine.ui.activity;
 
+import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.media.AudioManager;
+import android.os.Bundle;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
+import android.view.Gravity;
+import android.widget.FrameLayout.LayoutParams;
+
 import org.andengine.BuildConfig;
 import org.andengine.audio.music.MusicManager;
 import org.andengine.audio.sound.SoundManager;
@@ -26,15 +35,6 @@ import org.andengine.util.ActivityUtils;
 import org.andengine.util.Constants;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.system.SystemUtils;
-
-import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.media.AudioManager;
-import android.os.Bundle;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
-import android.view.Gravity;
-import android.widget.FrameLayout.LayoutParams;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -218,7 +218,7 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 		if(BuildConfig.DEBUG) {
 			Debug.d(this.getClass().getSimpleName() + ".onResumeGame" + " @(Thread: '" + Thread.currentThread().getName() + "')");
 		}
-
+        if(mEngine!=null)
 		this.mEngine.start();
 
 		this.mGamePaused = false;
@@ -335,6 +335,9 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	}
 
 	public VertexBufferObjectManager getVertexBufferObjectManager() {
+        if(mEngine==null){
+            return null;
+        }
 		return this.mEngine.getVertexBufferObjectManager();
 	}
 

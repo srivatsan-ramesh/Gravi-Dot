@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/relativeLayout"
-    android:background="#000000"
+    android:background="#446e8d"
     android:orientation="vertical" >
 
     <org.andengine.opengl.view.RenderSurfaceView
