@@ -42,6 +42,24 @@ public class Leaderboards {
             editor.putString(aesEncrDec.encrypt(baseGameActivity.getString(R.string.leaderboard_speed)),aesEncrDec.encrypt(speed + ""));
         }
     }
+    public void postScoreRepel(int score){
+        if(MainActivity.isSignedIn()) {
+            Games.Leaderboards.submitScore(googleApiClient, baseGameActivity.getString(R.string.leaderboard_scorerepel_mode), score);
+        }
+        else {
+            editor.putString(aesEncrDec.encrypt("status"),aesEncrDec.encrypt("pending"));
+            editor.putString(aesEncrDec.encrypt(baseGameActivity.getString(R.string.leaderboard_scorerepel_mode)),aesEncrDec.encrypt(score + ""));
+        }
+    }
+    public void postSpeedRepel(int speed){
+        if(MainActivity.isSignedIn()) {
+            Games.Leaderboards.submitScore(googleApiClient, baseGameActivity.getString(R.string.leaderboard_speedrepel_mode), speed);
+        }
+        else {
+            editor.putString(aesEncrDec.encrypt("status"),aesEncrDec.encrypt("pending"));
+            editor.putString(aesEncrDec.encrypt(baseGameActivity.getString(R.string.leaderboard_speedrepel_mode)),aesEncrDec.encrypt(speed + ""));
+        }
+    }
     public void commitItem(){
         editor.commit();
     }

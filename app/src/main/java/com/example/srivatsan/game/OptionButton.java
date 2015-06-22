@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 
+
 import com.google.android.gms.games.Games;
 
 import org.andengine.entity.IEntity;
@@ -25,45 +26,46 @@ public class OptionButton extends Sprite {
         this.ra_sh_le=ra_sh_le;
         this.act=act;
     }
-
+    ScaleModifier shrink,blow;
 
     @Override
-    public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-        if(pSceneTouchEvent.isActionUp()) {
+    public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+        if(pSceneTouchEvent.isActionUp() || pSceneTouchEvent.isActionMove()) {
 
-            //gameScene.unregisterTouchArea(PlayOrRetryButton);
-            this.registerEntityModifier(new ScaleModifier(0.1f,1.4f,1){
+            if(blow!=null)
+            this.unregisterEntityModifier(blow);
+            this.registerEntityModifier(shrink = new ScaleModifier(0.1f,1.4f,1){
                 @Override
                 protected void onModifierFinished(IEntity pItem)
                 {
                     super.onModifierFinished(pItem);
                     SharedPreferences s = act.getSharedPreferences("GAME",0);
                     String sign = s.getString("SignedIn","false");
-
+                    if(!pSceneTouchEvent.isActionMove())
                     switch (ra_sh_le){
                         case 0://leaderboard
                         {
-                            if (sign.equals("true")) {
+                            try {
                                 act.startActivityForResult(Games.Leaderboards.getAllLeaderboardsIntent(MainActivity.mGoogleApiClient),
                                         MainActivity.RC_UNUSED);
-                            } else {
+                            } catch (Exception e){
                                 MainActivity.googleConnect((MainActivity)act);
                                 // BaseGameUtils.makeSimpleDialog(act, act.getString(R.string.leaderboards_not_available)).show();
                             }
                         }
                         break;
                         case 1://achievement
-                            if (sign.equals("true")) {
+                            try {
                                 act.startActivityForResult(Games.Achievements.getAchievementsIntent(MainActivity.mGoogleApiClient),
                                         MainActivity.RC_UNUSED);
-                            } else {
+                            } catch(Exception e) {
                                 MainActivity.googleConnect((MainActivity)act);
                                 // BaseGameUtils.makeSimpleDialog(act, act.getString(R.string.leaderboards_not_available)).show();
                             }
                             break;
                         case 2://share
                             Intent textShareIntent = new Intent(Intent.ACTION_SEND);
-                            textShareIntent.putExtra(Intent.EXTRA_TEXT, " https://play.google.com/store/apps/details?id=com.flatearth.gravidot");
+                            textShareIntent.putExtra(Intent.EXTRA_TEXT, "Tackle the dots. Battle against gravity. Try the all new #GraviDot now! https://play.google.com/store/apps/details?id=com.flatearth.gravidot");
                             textShareIntent.setType("text/plain");
                             act.startActivity(Intent.createChooser(textShareIntent, "Share with..."));
                             Achievements a = new Achievements(MainActivity.mGoogleApiClient,act);
@@ -86,8 +88,11 @@ public class OptionButton extends Sprite {
 
         }
         else if(pSceneTouchEvent.isActionDown()){
-            if(this.getScaleX()==1)
-                this.registerEntityModifier(new ScaleModifier(0.1f,1,1.4f){
+
+                if(shrink!=null){
+                    this.unregisterEntityModifier(shrink);
+                }
+                this.registerEntityModifier(blow = new ScaleModifier(0.1f,1,1.4f){
                     @Override
                     protected void onModifierFinished(IEntity pItem)
                     {
@@ -99,21 +104,7 @@ public class OptionButton extends Sprite {
                     }
                 });
         }
-        /*if(pSceneTouchEvent.isActionDown()){
-            this.registerEntityModifier(new ScaleModifier(0.1f,1,1.4f){
-                @Override
-                protected void onModifierFinished(IEntity pItem)
-                {
-                    super.onModifierFinished(pItem);
-                    pItem.registerEntityModifier(new ScaleModifier(0.1f,1.4f,1));
-                    // Your action after finishing modifier
 
-                }
-            });
-        }
-        else {*/
-
-        /*}*/
         return true;
     }
 }

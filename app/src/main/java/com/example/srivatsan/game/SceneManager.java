@@ -1,10 +1,6 @@
 package com.example.srivatsan.game;
 
 import android.content.SharedPreferences;
-import android.os.CountDownTimer;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -46,6 +42,7 @@ import java.util.Iterator;
  */
 public class SceneManager {
     int passedDots=0;
+    static int MODE=0;
     int crashedSpeed=-1;
     Body body;
     Text SCORE,HighScore,PrevScore,speed,prevSpeed,highspeed;
@@ -53,10 +50,10 @@ public class SceneManager {
     private InterstitialAd interstitial;
     int score=0;
     int PAUSE_FLAG=0;
-    Sprite PlayOrRetryButton;
+    Sprite PlayOrRetryButton,RepelModeButton;
     protected static final int CAMERA_WIDTH = 800;
     protected static final int CAMERA_HEIGHT = 480;
-    protected static float INI_POS_X = CAMERA_WIDTH/5;
+    protected static float INI_POS_X = (CAMERA_WIDTH-MainActivity.canvasSurface.getMarginHorizontal())/5;
     protected static float INI_POS_Y = ((float)CAMERA_HEIGHT)/2;
     protected static int RADIUS = 32;
     float TouchX = INI_POS_X;
@@ -73,7 +70,7 @@ public class SceneManager {
     Text PauseTimerText;
 
 
-    ITextureRegion playerTextureRegion,playerTextureRegionLeaderboard,playerTextureRegionAchievement,playerTextureRegionRate,playerTextureRegionHome,playerTextureRegionGameOverOverlay,playerTextureRegionGameStars,playerTextureRegionGameBg,playerTextureRegionHomeScreen,playerTextureRegionShare,playerTextureRegionRetry,playerTextureRegionPlay,playerTextureRegionMainChar;
+    ITextureRegion playerTextureRegion,playerTextureRegionLeaderboard,playerTextureRegionRepel,playerTextureRegionAchievement,playerTextureRegionRate,playerTextureRegionHome,playerTextureRegionGameOverOverlay,playerTextureRegionGameStars,playerTextureRegionGameBg,playerTextureRegionHomeScreen,playerTextureRegionShare,playerTextureRegionRetry, playerTextureRegionAttract,playerTextureRegionMainChar;
 
     private AllScenes currentScene;
     BaseGameActivity activity;
@@ -92,15 +89,15 @@ public class SceneManager {
                 break;
             case MENU:
                 //engine setscene
-                activity.getWindow().getDecorView().setBackgroundColor(android.graphics.Color.rgb(68,110,141));
+                //activity.getWindow().getDecorView().setBackgroundColor(android.graphics.Color.rgb(68,110,141));
                 engine.setScene(menuScene);
                 break;
             case GAME:
-                activity.getWindow().getDecorView().setBackgroundColor(android.graphics.Color.rgb(68,110,141));
+                //activity.getWindow().getDecorView().setBackgroundColor(android.graphics.Color.rgb(68,110,141));
                 engine.setScene(gameScene);
                 break;
             case FINISH:
-                activity.getWindow().getDecorView().setBackgroundColor(android.graphics.Color.rgb(68,110,141));
+                //activity.getWindow().getDecorView().setBackgroundColor(android.graphics.Color.rgb(68,110,141));
                 engine.setScene(finishscene);
         }
     }
@@ -133,7 +130,7 @@ public class SceneManager {
         /*playerTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"charnew.png",800,24);
         playerTextureRegionPause = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"pause.png",864,24);
         playerTextureRegionRetry = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"retry.gif",800,152);
-        playerTextureRegionPlay = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"play.gif",800,88);
+        playerTextureRegionAttract = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"play.gif",800,88);
         playerTextureRegionRate = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"star.png",800,216);
         playerTextureRegionShare = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"share.png",832,216);
         playerTextureRegionMainChar = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"logo.png",915,25);
@@ -146,7 +143,8 @@ public class SceneManager {
         playerTextureRegionGameBg = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"skybg.png",0,0);
         playerTextureRegionGameStars = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"stars.png",800,0);
         playerTextureRegionGameOverOverlay = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"blackoverlay.png",980,480);
-        playerTextureRegionPlay = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"play.png",400,480);
+        playerTextureRegionRepel = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"repelmode.png",0,480);
+        playerTextureRegionAttract = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"attractmode.png",400,480);
         playerTextureRegionRetry = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"replay.png",540,480);
         playerTextureRegionHome = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"home.png",680,480);
         playerTextureRegionRate = BitmapTextureAtlasTextureRegionFactory.createFromAsset(MenuSceneTexture,activity,"rate.png",740,480);
@@ -183,10 +181,10 @@ public class SceneManager {
         editorAd.putString("InterstitialAd","true");
         editorAd.commit();
         finishscene.setBackground(new Background(Color.BLACK));
-        Sprite StarBgFinishScene = new Sprite(CAMERA_WIDTH/2-playerTextureRegionGameBg.getWidth()/2,CAMERA_HEIGHT/2-playerTextureRegionGameBg.getHeight()/2,playerTextureRegionGameBg,engine.getVertexBufferObjectManager());
+        Sprite StarBgFinishScene = new Sprite(CAMERA_WIDTH/2-playerTextureRegionGameBg.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal()/2,CAMERA_HEIGHT/2-playerTextureRegionGameBg.getHeight()/2,playerTextureRegionGameBg,engine.getVertexBufferObjectManager());
         finishscene.attachChild(StarBgFinishScene);
-        finishscene.attachChild(new Sprite(CAMERA_WIDTH/2-playerTextureRegionGameStars.getWidth()/2,CAMERA_HEIGHT/2-playerTextureRegionGameStars.getHeight()/2,playerTextureRegionGameStars,engine.getVertexBufferObjectManager()));
-        int BcenterX=400,BcenterY=230;
+        finishscene.attachChild(new Sprite(CAMERA_WIDTH/2-playerTextureRegionGameStars.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal()/2,CAMERA_HEIGHT/2-playerTextureRegionGameStars.getHeight()/2,playerTextureRegionGameStars,engine.getVertexBufferObjectManager()));
+        float BcenterX=400-MainActivity.canvasSurface.getMarginHorizontal()/2,BcenterY=230;
 
         /*Sprite SadGravi = new Sprite(0,0,playerTextureRegionFinishScene,engine.getVertexBufferObjectManager());
         SadGravi.registerEntityModifier(new RotationModifier(0.5f, -360, 0));
@@ -197,25 +195,31 @@ public class SceneManager {
         Sprite blackoverlay = new Sprite(StarBgFinishScene.getX()+BcenterX-playerTextureRegionGameOverOverlay.getWidth()/2,StarBgFinishScene.getY()+BcenterY-playerTextureRegionGameOverOverlay.getHeight()/2,playerTextureRegionGameOverOverlay,engine.getVertexBufferObjectManager());
         finishscene.attachChild(blackoverlay);
         PlayOrRetryButton = new Sprite(StarBgFinishScene.getX()+BcenterX-playerTextureRegionRetry.getWidth()/2,StarBgFinishScene.getY()+BcenterY+125-playerTextureRegionRetry.getHeight()/2, playerTextureRegionRetry, engine.getVertexBufferObjectManager()){
+            ScaleModifier shrink,blow;
             @Override
-            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                if(pSceneTouchEvent.isActionUp()) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if(pSceneTouchEvent.isActionUp() || pSceneTouchEvent.isActionMove()) {
 
                     //gameScene.unregisterTouchArea(PlayOrRetryButton);
-                    this.registerEntityModifier(new ScaleModifier(0.1f,1.4f,1){
+                    if(blow!=null)
+                        this.unregisterEntityModifier(blow);
+                    this.registerEntityModifier(shrink = new ScaleModifier(0.1f,1.4f,1){
                         @Override
                         protected void onModifierFinished(IEntity pItem)
                         {
                             super.onModifierFinished(pItem);
-                            createGameScene();
-                            setCurrentScene(SceneManager.AllScenes.GAME);
+                            if(!pSceneTouchEvent.isActionMove()) {
+                                createGameScene();
+                                setCurrentScene(SceneManager.AllScenes.GAME);
+                            }
                         }
                     });
 
                 }
                 if(pSceneTouchEvent.isActionDown()){
-                    if(this.getScaleX()==1)
-                        this.registerEntityModifier(new ScaleModifier(0.1f,1,1.4f){
+                    if(shrink!=null)
+                        this.unregisterEntityModifier(shrink);
+                        this.registerEntityModifier(blow = new ScaleModifier(0.1f,1,1.4f){
                             @Override
                             protected void onModifierFinished(IEntity pItem)
                             {
@@ -252,7 +256,10 @@ public class SceneManager {
 
         SharedPreferences sharedPref = activity.getSharedPreferences("GAME",0);
         int hs = Integer.parseInt(sharedPref.getString("HighScore", 0 + ""));
-        int hv = Integer.parseInt(sharedPref.getString("HighSpeed", 0 + ""));
+        int hs_repel = Integer.parseInt(sharedPref.getString("HighScoreRepel", 0 + ""));
+        if(MODE==1){
+            hs=hs_repel;
+        }
         HighScore = new Text(highscore.getX()+highscore.getWidth(), highscore.getY()+highscore.getHeight()-45, this.TextFontfinishlarge, ""+hs, new TextOptions(HorizontalAlign.CENTER), this.engine.getVertexBufferObjectManager());
         if(blackoverlay.getX()+blackoverlay.getWidth()-highscore.getX()-highscore.getWidth()<HighScore.getWidth()){
             HighScore.setScale((blackoverlay.getX()+blackoverlay.getWidth()-highscore.getX()-highscore.getWidth())/HighScore.getWidth());
@@ -266,25 +273,31 @@ public class SceneManager {
         //finishscene.attachChild(highspeed);
         finishscene.attachChild(prevSpeed);
         OptionButton home = new OptionButton(StarBgFinishScene.getX()+BcenterX-190-playerTextureRegionHome.getWidth()/2,StarBgFinishScene.getY()+BcenterY+135-playerTextureRegionHome.getHeight()/2,playerTextureRegionHome,activity.getVertexBufferObjectManager(),4,activity){
+            ScaleModifier shrink,blow;
             @Override
-            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                if(pSceneTouchEvent.isActionUp()) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if(pSceneTouchEvent.isActionUp() || pSceneTouchEvent.isActionMove()) {
 
                     //gameScene.unregisterTouchArea(PlayOrRetryButton);
-                    this.registerEntityModifier(new ScaleModifier(0.1f,1.4f,1){
+                    if(blow!=null)
+                        this.unregisterEntityModifier(blow);
+                    this.registerEntityModifier(shrink = new ScaleModifier(0.1f,1.4f,1){
                         @Override
                         protected void onModifierFinished(IEntity pItem)
                         {
                             super.onModifierFinished(pItem);
-                            createMenuScene();
-                            setCurrentScene(AllScenes.MENU);
+                            if(!pSceneTouchEvent.isActionMove()) {
+                                createMenuScene();
+                                setCurrentScene(AllScenes.MENU);
+                            }
                         }
                     });
 
                 }
                 if(pSceneTouchEvent.isActionDown()){
-                    if(this.getScaleX()==1)
-                        this.registerEntityModifier(new ScaleModifier(0.1f,1,1.4f){
+                        if(shrink!=null)
+                            this.unregisterEntityModifier(shrink);
+                        this.registerEntityModifier(blow = new ScaleModifier(0.1f,1,1.4f){
                             @Override
                             protected void onModifierFinished(IEntity pItem)
                             {
@@ -326,8 +339,8 @@ public class SceneManager {
         editorAd.commit();
         splashScene = new Scene();
         splashScene.setBackground(new Background(((float)68)/255,((float)110)/255,((float)141)/255));
-        Sprite SplashImage = new Sprite(0,0,splashTR,engine.getVertexBufferObjectManager());
-        SplashImage.setPosition(camera.getWidth()/2-SplashImage.getWidth()/2,camera.getHeight()/2-SplashImage.getHeight()/2);
+        Sprite SplashImage = new Sprite(CAMERA_WIDTH/2-splashTR.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal(),0,splashTR,engine.getVertexBufferObjectManager());
+        SplashImage.setPosition(camera.getWidth()/2-SplashImage.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal(),camera.getHeight()/2-SplashImage.getHeight()/2);
         splashScene.attachChild(SplashImage);
         return splashScene;
     }
@@ -340,34 +353,42 @@ public class SceneManager {
         editorAd.commit();
         menuScene = new Scene();
         menuScene.setBackground(new Background(((float)44)/255,((float)62)/255,((float)80)/255));
-        Sprite bg = new Sprite(CAMERA_WIDTH/2-playerTextureRegionGameBg.getWidth()/2,CAMERA_HEIGHT/2-playerTextureRegionGameBg.getHeight()/2,playerTextureRegionGameBg,engine.getVertexBufferObjectManager());
+        Sprite bg = new Sprite(CAMERA_WIDTH/2-playerTextureRegionGameBg.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal()/2,CAMERA_HEIGHT/2-playerTextureRegionGameBg.getHeight()/2,playerTextureRegionGameBg,engine.getVertexBufferObjectManager());
         menuScene.attachChild(bg);
-        Sprite stars = new Sprite(CAMERA_WIDTH/2-playerTextureRegionGameStars.getWidth()/2,CAMERA_HEIGHT/2-playerTextureRegionGameStars.getHeight()/2,playerTextureRegionGameStars,engine.getVertexBufferObjectManager());
+        Sprite stars = new Sprite(CAMERA_WIDTH/2-playerTextureRegionGameStars.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal()/2,CAMERA_HEIGHT/2-playerTextureRegionGameStars.getHeight()/2,playerTextureRegionGameStars,engine.getVertexBufferObjectManager());
         menuScene.attachChild(stars);
         //Sprite icon = new Sprite(0,0,playerTextureRegionContent,engine.getVertexBufferObjectManager());
         //icon.setScale(2f);
         //icon.setPosition(camera.getWidth()/2-icon.getWidth()/2,icon.getHeight()/2+64);
         //menuScene.attachChild(icon);
-        PlayOrRetryButton = new Sprite(stars.getX()+400-playerTextureRegionPlay.getWidth()/2,stars.getY()+245-playerTextureRegionPlay.getHeight()/2, playerTextureRegionPlay, engine.getVertexBufferObjectManager()){
+        int OFFSET_FOR_MODES=80;
+        PlayOrRetryButton = new Sprite(stars.getX()+400-OFFSET_FOR_MODES- playerTextureRegionAttract.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal()/2,stars.getY()+245- playerTextureRegionAttract.getHeight()/2, playerTextureRegionAttract, engine.getVertexBufferObjectManager()){
+            ScaleModifier shrink,blow;
             @Override
-            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                if(pSceneTouchEvent.isActionUp()) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if(pSceneTouchEvent.isActionUp() || pSceneTouchEvent.isActionMove()) {
 
                     //gameScene.unregisterTouchArea(PlayOrRetryButton);
-                    this.registerEntityModifier(new ScaleModifier(0.1f,1.4f,1){
+                    if(blow!=null)
+                        this.unregisterEntityModifier(blow);
+                    this.registerEntityModifier(shrink = new ScaleModifier(0.1f,1.4f,1){
                         @Override
                         protected void onModifierFinished(IEntity pItem)
                         {
                             super.onModifierFinished(pItem);
-                            createGameScene();
-                            setCurrentScene(SceneManager.AllScenes.GAME);
+                            if(!pSceneTouchEvent.isActionMove()) {
+                                MODE=0;
+                                createGameScene();
+                                setCurrentScene(SceneManager.AllScenes.GAME);
+                            }
                         }
                     });
 
                 }
-                if(pSceneTouchEvent.isActionDown()){
-                    if(this.getScaleX()==1)
-                    this.registerEntityModifier(new ScaleModifier(0.1f,1,1.4f){
+                else if(pSceneTouchEvent.isActionDown()){
+                    if(shrink!=null)
+                        this.unregisterEntityModifier(shrink);
+                    this.registerEntityModifier(blow = new ScaleModifier(0.1f,1,1.4f){
                         @Override
                         protected void onModifierFinished(IEntity pItem)
                         {
@@ -382,26 +403,65 @@ public class SceneManager {
                 return true;
             }
         };
+        RepelModeButton = new Sprite(stars.getX()+400+OFFSET_FOR_MODES- playerTextureRegionRepel.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal()/2,stars.getY()+245- playerTextureRegionRepel.getHeight()/2, playerTextureRegionRepel, engine.getVertexBufferObjectManager()){
+            ScaleModifier shrink,blow;
+            @Override
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if(pSceneTouchEvent.isActionUp() || pSceneTouchEvent.isActionMove()) {
 
+                    //gameScene.unregisterTouchArea(PlayOrRetryButton);
+                    if(blow!=null)
+                        this.unregisterEntityModifier(blow);
+                    this.registerEntityModifier(shrink = new ScaleModifier(0.1f,1.4f,1){
+                        @Override
+                        protected void onModifierFinished(IEntity pItem)
+                        {
+                            super.onModifierFinished(pItem);
+                            if(!pSceneTouchEvent.isActionMove()) {
+                                MODE=1;
+                                createGameScene();
+                                setCurrentScene(SceneManager.AllScenes.GAME);
+                            }
+                        }
+                    });
+
+                }
+                else if(pSceneTouchEvent.isActionDown()){
+                    if(shrink!=null)
+                        this.unregisterEntityModifier(shrink);
+                    this.registerEntityModifier(blow = new ScaleModifier(0.1f,1,1.4f){
+                        @Override
+                        protected void onModifierFinished(IEntity pItem)
+                        {
+                            super.onModifierFinished(pItem);
+                            //pItem.registerEntityModifier(new ScaleModifier(0.1f,1.4f,1));
+                            // Your action after finishing modifier
+
+
+                        }
+                    });
+                }
+                return true;
+            }
+        };
         menuScene.registerTouchArea(PlayOrRetryButton);
         menuScene.attachChild(PlayOrRetryButton);
-        SharedPreferences sharedPref = activity.getSharedPreferences("GAME",0);
-        int hs = Integer.parseInt(sharedPref.getString("HighScore", 0 + ""));
-        int hv = Integer.parseInt(sharedPref.getString("HighSpeed", 0 + ""));
+        menuScene.registerTouchArea(RepelModeButton);
+        menuScene.attachChild(RepelModeButton);
         /*HighScore = new Text(CAMERA_WIDTH/20, CAMERA_HEIGHT/3, this.TextFontMedium, "BEST SCORE : "+hs, new TextOptions(HorizontalAlign.CENTER), this.engine.getVertexBufferObjectManager());
         highspeed = new Text(CAMERA_WIDTH/20, CAMERA_HEIGHT/3+40, this.TextFontMedium, "BEST SPEED : "+hv+" m/s", new TextOptions(HorizontalAlign.CENTER), this.engine.getVertexBufferObjectManager());
         menuScene.attachChild(HighScore);
         menuScene.attachChild(highspeed);*/
         Text gravidot = new Text(0, 0, this.TextFontLarge, "GRAVIDOT", new TextOptions(HorizontalAlign.CENTER), this.engine.getVertexBufferObjectManager());
 
-        OptionButton rate = new OptionButton(stars.getX()+520-playerTextureRegionRate.getWidth()/2,stars.getY()+380-playerTextureRegionRate.getHeight()/2,playerTextureRegionRate,activity.getVertexBufferObjectManager(),3,activity);
-        OptionButton share = new OptionButton(stars.getX()+280-playerTextureRegionRate.getWidth()/2,stars.getY()+380-playerTextureRegionRate.getHeight()/2,playerTextureRegionShare,activity.getVertexBufferObjectManager(),2,activity);
-        OptionButton achievement = new OptionButton(stars.getX()+360-playerTextureRegionAchievement.getWidth()/2,stars.getY()+380-playerTextureRegionAchievement.getHeight()/2,playerTextureRegionAchievement,activity.getVertexBufferObjectManager(),1,activity);
-        OptionButton leaderboard = new OptionButton(stars.getX()+440-playerTextureRegionLeaderboard.getWidth()/2,stars.getY()+380-playerTextureRegionLeaderboard.getHeight()/2,playerTextureRegionLeaderboard,activity.getVertexBufferObjectManager(),0,activity);
+        OptionButton rate = new OptionButton(stars.getX()+520-playerTextureRegionRate.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal()/2,stars.getY()+380-playerTextureRegionRate.getHeight()/2,playerTextureRegionRate,activity.getVertexBufferObjectManager(),3,activity);
+        OptionButton share = new OptionButton(stars.getX()+280-playerTextureRegionRate.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal()/2,stars.getY()+380-playerTextureRegionRate.getHeight()/2,playerTextureRegionShare,activity.getVertexBufferObjectManager(),2,activity);
+        OptionButton achievement = new OptionButton(stars.getX()+360-playerTextureRegionAchievement.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal()/2,stars.getY()+380-playerTextureRegionAchievement.getHeight()/2,playerTextureRegionAchievement,activity.getVertexBufferObjectManager(),1,activity);
+        OptionButton leaderboard = new OptionButton(stars.getX()+440-playerTextureRegionLeaderboard.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal()/2,stars.getY()+380-playerTextureRegionLeaderboard.getHeight()/2,playerTextureRegionLeaderboard,activity.getVertexBufferObjectManager(),0,activity);
 
         //rate.setScale(2f);
         //share.setScale(2f);
-        gravidot.setPosition(stars.getX()+400-gravidot.getWidth()/2,stars.getY()+100-gravidot.getHeight()/2);
+        gravidot.setPosition(stars.getX()+400-gravidot.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal()/2,stars.getY()+100-gravidot.getHeight()/2);
         menuScene.attachChild(gravidot);
         menuScene.attachChild(rate);
         menuScene.attachChild(share);
@@ -498,7 +558,7 @@ public class SceneManager {
         PauseTimerText.setColor(Color.WHITE);
         SCORE = new Text(100, 40, this.TextFontMediumWhite, "99999999", new TextOptions(HorizontalAlign.CENTER), this.engine.getVertexBufferObjectManager());
         SCORE.setText(""+0);
-        SCORE.setPosition(CAMERA_WIDTH/2-SCORE.getWidth()/2, 40);
+        SCORE.setPosition(CAMERA_WIDTH/2-SCORE.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal(), 40);
 
         //SCORE = new Text(CAMERA_WIDTH/2-SCORE.getWidth()/2, 40, this.TextFontMedium, "999999999", new TextOptions(HorizontalAlign.CENTER), this.engine.getVertexBufferObjectManager());
 
@@ -534,11 +594,15 @@ public class SceneManager {
                     double r = Math.sqrt(Math.pow((Gravi.getX() - BlueDot.getX()), 2) + Math.pow((Gravi.getY() - BlueDot.getY()), 2));
                     float Fx = r > 0 ? ((float) ((Gravi.getX() - BlueDot.getX() ) * 1000 / (r * r))) : 0;
                     float Fy = r > 0 ? ((float) ((Gravi.getY() - BlueDot.getY()) * 1000 / (r * r))) : 0;
-                    body.applyForce(-10 * Fx, -10 * Fy, Gravi.getX() + 16, Gravi.getY() + 16);
+                    if(MODE==0){
+                        Fx=-Fx;
+                        Fy=-Fy;
+                    }
+                    body.applyForce(10 * Fx, 10 * Fy, Gravi.getX() + 16, Gravi.getY() + 16);
                     if (body.getLinearVelocity().x >= 0) {
                         camera.setCenter(Gravi.getX() - INI_POS_X + CAMERA_WIDTH / 2 , CAMERA_HEIGHT / 2);
                         ground.setPosition(Gravi.getX() - INI_POS_X, 0);
-                        SCORE.setPosition(Gravi.getX() - INI_POS_X +CAMERA_WIDTH/2-SCORE.getWidth()/2, 40);
+                        SCORE.setPosition(Gravi.getX() - INI_POS_X +CAMERA_WIDTH/2-SCORE.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal(), 40);
                         if(score!=(ground.getX()/800)){
                             score=(int)ground.getX()/800;
                             SCORE.setText(""+score);
@@ -588,7 +652,7 @@ public class SceneManager {
                             .getWidth() / 2);
                     final int y = (int) (camera.getHeight() / 2 - playerTextureRegionPause
                             .getHeight() / 2);
-                    final Sprite pausedSprite = new Sprite(x, y, playerTextureRegionPlay, getVertexBufferObjectManager()) {
+                    final Sprite pausedSprite = new Sprite(x, y, playerTextureRegionAttract, getVertexBufferObjectManager()) {
                         @Override
                         public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
                             if (pSceneTouchEvent.isActionDown()) {
@@ -630,8 +694,12 @@ public class SceneManager {
         gameScene.attachChild(pausebutton);
         gameScene.registerTouchArea(pausebutton);*/
 
-        Text touchtostart_sub = HighScore = new Text(0,0, this.TextFontfinishsmall, "TOUCH TO PLACE A BLUE DOT\nAND ATTRACT THE RED DOT\nDON'T ALLOW IT TO ESCAPE!", new TextOptions(HorizontalAlign.CENTER), this.engine.getVertexBufferObjectManager());
-        final Text touchtostart=new Text(CAMERA_WIDTH/2-touchtostart_sub.getWidth()/2,CAMERA_HEIGHT/2-touchtostart_sub.getHeight()/2, this.TextFontfinishsmall, "TOUCH TO PLACE A BLUE DOT\nAND ATTRACT THE RED DOT\nDON'T ALLOW IT TO ESCAPE!", new TextOptions(HorizontalAlign.CENTER), this.engine.getVertexBufferObjectManager());
+        String INSTRUCTIONS = "TOUCH TO PLACE A GREEN DOT\nTO ATTRACT THE RED DOT\n\n\n\n\n\nNEITHER ALLOW THE RED DOT TO ESCAPE\nNOR GET CRASHED INTO THE GREEN DOT!";
+        if(MODE==1){
+            INSTRUCTIONS="TOUCH TO PLACE A GREEN DOT\nTO REPEL THE RED DOT\n\n\n\n\n\nNEITHER ALLOW THE RED DOT TO ESCAPE\nNOR GET CRASHED INTO THE GREEN DOT!";
+        }
+        Text touchtostart_sub = HighScore = new Text(0,0, this.TextFontfinishsmall, INSTRUCTIONS, new TextOptions(HorizontalAlign.CENTER), this.engine.getVertexBufferObjectManager());
+        final Text touchtostart=new Text(CAMERA_WIDTH/2-touchtostart_sub.getWidth()/2-MainActivity.canvasSurface.getMarginHorizontal()/2,CAMERA_HEIGHT/2-touchtostart_sub.getHeight()/2, this.TextFontfinishsmall,INSTRUCTIONS, new TextOptions(HorizontalAlign.CENTER), this.engine.getVertexBufferObjectManager());
         gameScene.attachChild(touchtostart);
         ground = new Rectangle(0,0,CAMERA_WIDTH,CAMERA_HEIGHT,this.engine.getVertexBufferObjectManager()){
             @Override
@@ -653,6 +721,7 @@ public class SceneManager {
                             final Sprite sprite= BlueDot;
                             gameScene.attachChild(sprite);
                             final Sprite spritesub=new Sprite(pSceneTouchEvent.getX()+CAMERA_WIDTH, pSceneTouchEvent.getY(), playerTextureRegion, getVertexBufferObjectManager());
+                            spritesub.setRotation(45.0f);
                             gameScene.attachChild(spritesub);
                             spritesub.registerUpdateHandler(new IUpdateHandler() {
                                 @Override
@@ -709,6 +778,7 @@ public class SceneManager {
                                         sprite.setPosition(-20,-20);*/
                                     double r = Math.sqrt(Math.pow((Gravi.getX() - sprite.getX() - 16), 2) + Math.pow((Gravi.getY() - sprite.getY() - 16), 2));
                                     if (sprite.collidesWith(Gravi) && r <= 48) {
+                                        crashedSpeed=(int)body.getLinearVelocity().len();
                                         Achievements a = new Achievements(MainActivity.mGoogleApiClient,activity);
                                         a.unlockCrashed();
                                         a.commitItem();
@@ -740,7 +810,7 @@ public class SceneManager {
 
         gameScene.setTouchAreaBindingOnActionMoveEnabled(false);
     }
-    public void count(){
+    /*public void count(){
         final Handler handler = new Handler(Looper.getMainLooper());
         handler.post(
                 new Runnable()
@@ -752,7 +822,7 @@ public class SceneManager {
                             int i=3;
                             public void onTick(long millisUntilFinished) {
                                 //PauseTimerText.setText(""+(millisUntilFinished/1000));
-                                Log.d("" + (millisUntilFinished / 1000), "" + i);
+
                                 gameScene.detachChild(PauseTimerText);
                                 PauseTimerText = new Text(Gravi.getX()-INI_POS_X+CAMERA_WIDTH/2- PauseTimerText.getWidth()/2, CAMERA_HEIGHT/2- PauseTimerText.getHeight()/2, TextFontMedium, (String.valueOf(i)), new TextOptions(HorizontalAlign.CENTER), engine.getVertexBufferObjectManager());
                                 PauseTimerText.setColor(Color.WHITE);
@@ -775,18 +845,20 @@ public class SceneManager {
                     }
                 }
         );
-    }
+    }*/
     public void restart(){
         resetPhysics();
         SharedPreferences sharedPref = activity.getSharedPreferences("GAME",0);
         int hs = Integer.parseInt(sharedPref.getString("HighScore", 0 + ""));
         int hv = Integer.parseInt(sharedPref.getString("HighSpeed", 0 + ""));
+        int hs_repel = Integer.parseInt(sharedPref.getString("HighScoreRepel", 0 + ""));
+        int hv_repel = Integer.parseInt(sharedPref.getString("HighSpeedRepel", 0 + ""));
         int no_of_games = Integer.parseInt(sharedPref.getString("GamesPlayed",0+""));
         no_of_games++;
         SharedPreferences example = activity.getSharedPreferences("GAME", 0);
         SharedPreferences.Editor editor = example.edit();
         AesEncrDec aesEncrDec = new AesEncrDec();
-        if(hs<score){
+        if(hs<score && MODE==0){
             hs=score;
                 Achievements a = new Achievements(MainActivity.mGoogleApiClient,activity);
                 a.unlockScore(hs);
@@ -795,7 +867,7 @@ public class SceneManager {
                 a.commitItem();
             l.commitItem();
         }
-        if(hv<current_speed){
+        if(hv<current_speed && MODE==0){
             hv=current_speed;
             Achievements a = new Achievements(MainActivity.mGoogleApiClient,activity);
             a.unlockSpeed(hv);
@@ -804,7 +876,27 @@ public class SceneManager {
             a.commitItem();
             l.commitItem();
         }
+        if(hs_repel<score && MODE==1){
+            hs_repel=score;
+            Achievements a = new Achievements(MainActivity.mGoogleApiClient,activity);
+            a.unlockScore(hs_repel);
+            Leaderboards l = new Leaderboards(MainActivity.mGoogleApiClient,activity);
+            l.postScoreRepel(hs_repel);
+            a.commitItem();
+            l.commitItem();
+        }
+        if(hv_repel<current_speed && MODE==1){
+            hv_repel=current_speed;
+            Achievements a = new Achievements(MainActivity.mGoogleApiClient,activity);
+            a.unlockSpeed(hv_repel);
+            Leaderboards l = new Leaderboards(MainActivity.mGoogleApiClient,activity);
+            l.postSpeedRepel(hv_repel);
+            a.commitItem();
+            l.commitItem();
+        }
         Achievements a = new Achievements(MainActivity.mGoogleApiClient,activity);
+        if(score==200)
+            a.unlockScore(score);
         a.unlockGamesPlayed(no_of_games);
         a.unlockPassedDot(passedDots);
         if(crashedSpeed!=-1){
@@ -814,12 +906,14 @@ public class SceneManager {
         a.commitItem();
         editor.putString("HighScore",hs + "");
         editor.putString("HighSpeed", hv + "");
+        editor.putString("HighScoreRepel",hs_repel + "");
+        editor.putString("HighSpeedRepel", hv_repel + "");
         editor.putString("GamesPlayed",no_of_games+"");
         editor.commit();
         engine.start();
         body.setLinearVelocity(0, 0);
         Start=0;
-        INI_POS_X = CAMERA_WIDTH/5;
+        INI_POS_X = (CAMERA_WIDTH-MainActivity.canvasSurface.getMarginHorizontal())/5;
         INI_POS_Y = CAMERA_HEIGHT/2;
         createFinishScene();
         passedDots=0;

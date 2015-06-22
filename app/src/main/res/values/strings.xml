@@ -13,13 +13,19 @@
     <string name="achievement_the_beginners_club">CgkIs5O1_rgIEAIQAg</string>
     <string name="achievement_the_five_squared_club">CgkIs5O1_rgIEAIQCQ</string>
     <string name="achievement_the_century_club">CgkIs5O1_rgIEAIQBQ</string>
-
+    <string name="achievement_200_score">CgkIs5O1_rgIEAIQIQ</string>
+    <string name="achievement_500">CgkIs5O1_rgIEAIQIg</string>
+    <string name="achievement_1000">CgkIs5O1_rgIEAIQIw</string>
   <!--***************************************************-->
 
   <!--speed ach. -->
     <string name="achievement_slow_is_better">CgkIs5O1_rgIEAIQDQ</string>
     <string name="achievement_excessive_speeding_ticket">CgkIs5O1_rgIEAIQCg</string>
     <string name="achievement_god_speed">CgkIs5O1_rgIEAIQAw</string>
+    <string name="achievement_speed1">CgkIs5O1_rgIEAIQHA</string>
+    <string name="achievement_speed2">CgkIs5O1_rgIEAIQHQ</string>
+    <string name="achievement_speed3">CgkIs5O1_rgIEAIQHg</string>
+    <string name="achievement_speed4">CgkIs5O1_rgIEAIQHw</string>
   <!--***************************************************-->
 
   <!--crash_ach.-->
@@ -49,13 +55,36 @@
     <string name="achievement_50_games">CgkIs5O1_rgIEAIQFw</string>
     <string name="achievement_100_games">CgkIs5O1_rgIEAIQGA</string>
     <string name="achievement_200_games">CgkIs5O1_rgIEAIQGg</string>
+    <string name="achievement_500_games">CgkIs5O1_rgIEAIQIA</string>
     <string name="achievement_1000_games">CgkIs5O1_rgIEAIQGw</string>
     <!--************************************************-->
+    <!--Repel mode-**************************************-->
 
+    <string name="achievement_the_beginners_club__repel_mode">CgkIs5O1_rgIEAIQKA</string>
+    <string name="achievement_the_five_squared_club__repel_mode">CgkIs5O1_rgIEAIQKQ</string>
+    <string name="achievement_the_century_club__repel_mode">CgkIs5O1_rgIEAIQKg</string>
+    <string name="achievement_half_way_to_a_millenium_and_beyond__repel_mode">CgkIs5O1_rgIEAIQKw</string>
+    <string name="achievement_a_millennium_milestone__repel_mode">CgkIs5O1_rgIEAIQLA</string>
+    <string name="achievement_slow_is_better__repel_mode">CgkIs5O1_rgIEAIQLQ</string>
+    <string name="achievement_too_lethargic__repel_mode">CgkIs5O1_rgIEAIQLg</string>
+    <string name="achievement_handful_of_speed__repel_mode">CgkIs5O1_rgIEAIQLw</string>
+    <string name="achievement_overspeeding__repel_mode">CgkIs5O1_rgIEAIQMA</string>
+    <string name="achievement_reckless_speeding__repel_mode">CgkIs5O1_rgIEAIQMQ</string>
+    <string name="achievement_insanity_at_its_peak__repel_mode">CgkIs5O1_rgIEAIQMg</string>
+    <string name="achievement_god_speed__repel_mode">CgkIs5O1_rgIEAIQMw</string>
+    <string name="achievement_ouch_that_was_a_bad_hit__repel_mode">CgkIs5O1_rgIEAIQNA</string>
+    <string name="achievement_smooth_as_silk__repel_mode">CgkIs5O1_rgIEAIQNQ</string>
+    <string name="achievement_well_timed_hit__repel_mode">CgkIs5O1_rgIEAIQNg</string>
+    <string name="achievement_high_speed_crash__repel_mode">CgkIs5O1_rgIEAIQNw</string>
+    <string name="achievement_clear_pass__repel_mode">CgkIs5O1_rgIEAIQOA</string>
+    <string name="achievement_cruising_like_a_boss__repel_mode">CgkIs5O1_rgIEAIQOQ</string>
+    <string name="achievement_the_sky_is_the_lower_limit__repel_mode">CgkIs5O1_rgIEAIQOg</string>
 
+    <!--*******************************************************************-->
     <string name="leaderboard_score">CgkIs5O1_rgIEAIQAQ</string>
     <string name="leaderboard_speed">CgkIs5O1_rgIEAIQCA</string>
-
+    <string name="leaderboard_scorerepel_mode">CgkIs5O1_rgIEAIQJg</string>
+    <string name="leaderboard_speedrepel_mode">CgkIs5O1_rgIEAIQJw</string>
 
     <string name="signin_other_error">Sign in Error</string>
 

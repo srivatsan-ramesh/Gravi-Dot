@@ -13,7 +13,7 @@
         android:label="Tests for org.andengine.extension.physics.box2d.test"
         android:targetPackage="org.andengine.extension.physics.box2d.test" />
 
-    <application android:debuggable="true" >
+    <application>
         <uses-library android:name="android.test.runner" />
     </application>
 

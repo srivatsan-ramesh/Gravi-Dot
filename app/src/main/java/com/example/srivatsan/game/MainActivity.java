@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.Log;
+
 import android.view.View;
 
 import com.flatearth.gravidot.R;
@@ -27,7 +27,6 @@ import com.google.example.games.basegameutils.BaseGameUtils;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
-import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.scene.Scene;
 import org.andengine.ui.activity.LayoutGameActivity;
 
@@ -45,9 +44,10 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
     public static Context c;
     SceneManager sceneManager;
     private InterstitialAd interstitial;
+    static CroppedResolutionPolicy canvasSurface;
     protected static final int CAMERA_WIDTH = 800;
     protected static final int CAMERA_HEIGHT = 480;
-    protected static int AD_INTERVAL = 50 ; // in seconds
+    protected static int AD_INTERVAL = 180 ; // in seconds
     // Client used to interact with Google APIs
     public static GoogleApiClient mGoogleApiClient;
     SharedPreferences.OnSharedPreferenceChangeListener BannerListener,InterstitialListener;
@@ -73,21 +73,21 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
 
 
     /*BitmapTextureAtlas MenuSceneTexture;
-    ITextureRegion playerTextureRegion,playerTextureRegionPause,playerTextureRegionPlay,playerTextureRegionMainChar,playerTextureRegionTouchStart;
+    ITextureRegion playerTextureRegion,playerTextureRegionPause,playerTextureRegionAttract,playerTextureRegionMainChar,playerTextureRegionTouchStart;
 */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_main);
-        Log.d("oncreate()","entered");
+
         adView = (AdView) this.findViewById(R.id.adView);
         PACKAGE_NAME=getPackageName();
         // Request for Ads
         AdRequest adRequest = new AdRequest.Builder()
 
-          // / Add a test device to show Test Ads
+                // / Add a test device to show Test Ads
                 //.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                .addTestDevice("3B7F9C99755A03D44BCACE7E91EAD130")
+                //.addTestDevice("3B7F9C99755A03D44BCACE7E91EAD130")
                 .build();
 
         // Load ads into Banner Ads
@@ -102,7 +102,6 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
                             RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                     adParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
                     //relativeLayout.removeView(adView);
-
                     relativeLayout.addView(adView, adParams);*/
                     adView.setVisibility(View.VISIBLE);
                 }
@@ -120,16 +119,16 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
     }
     public void displayInterstitial() {
         // If Ads are loaded, show Interstitial else show nothing.
-        
+
         AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice("3B7F9C99755A03D44BCACE7E91EAD130")
+                //.addTestDevice("3B7F9C99755A03D44BCACE7E91EAD130")
                 .build();
         interstitial.loadAd(adRequest);
         interstitial.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
                 // Call displayInterstitial() function
-                Log.d("interstitial","add");
+
                 if (interstitial.isLoaded()) {
                     startTimer();
                 }
@@ -138,7 +137,7 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
             public void onAdFailedToLoad(int errorCode) {
                 // TODO Auto-generated method stub
                 super.onAdFailedToLoad(errorCode);
-                Log.d("Interstirial","failed");
+
                 displayInterstitial();
 
             }
@@ -146,7 +145,7 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
             public void onAdClosed() {
                 // TODO Auto-generated method stub
                 super.onAdClosed();
-                Log.d("Interstitial","closed");
+
                 displayInterstitial();
             }
 
@@ -192,9 +191,11 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(TAG, "onStart(): connecting");
-        if(mGoogleApiClient!=null)
-        mGoogleApiClient.connect();
+
+        SharedPreferences s = getSharedPreferences("GAME",0);
+
+        if(mGoogleApiClient!=null && s.getString("SignedIn","false").equals("true"))
+            mGoogleApiClient.connect();
     }
     @Override
     protected void onDestroy(){
@@ -205,17 +206,18 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(TAG, "onStop(): disconnecting");
+
         if(mGoogleApiClient!=null)
-        if (mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
+            if (mGoogleApiClient.isConnected()) {
+                mGoogleApiClient.disconnect();
+            }
     }
     Camera mCamera;
     @Override
     public EngineOptions onCreateEngineOptions() {
         mCamera = new Camera(0,0,CAMERA_WIDTH,CAMERA_HEIGHT);
-        EngineOptions options = new EngineOptions(true, ScreenOrientation.LANDSCAPE_SENSOR,new RatioResolutionPolicy(CAMERA_WIDTH,CAMERA_HEIGHT),mCamera);
+        canvasSurface = new CroppedResolutionPolicy( CAMERA_WIDTH, CAMERA_HEIGHT );
+        EngineOptions options = new EngineOptions(true, ScreenOrientation.LANDSCAPE_SENSOR,canvasSurface,mCamera);
 
         return options;
     }
@@ -243,7 +245,6 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
     public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback) throws Exception {
         /*scene = new Scene();
         scene.setBackground(new Background(255,255,255));
-
         physicsWorld = new PhysicsWorld(new Vector2(0, 0),false);
         scene.registerUpdateHandler(physicsWorld);
         mEngine.registerUpdateHandler(new FPSLogger());
@@ -305,6 +306,8 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
         SharedPreferences sharedPref = getSharedPreferences("GAME",0);
         int hs = Integer.parseInt(sharedPref.getString("HighScore", -1 + ""));
         int hv = Integer.parseInt(sharedPref.getString("HighSpeed", -1 + ""));
+        int hs_repel = Integer.parseInt(sharedPref.getString("HighScoreRepel", -1 + ""));
+        int hv_repel = Integer.parseInt(sharedPref.getString("HighSpeedRepel", -1 + ""));
         SharedPreferences.Editor e = sharedPref.edit();
         e.putString("SignedIn","true");
         e.commit();
@@ -313,6 +316,12 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
         }
         if(hv==-1){
             loadScoreOfLeaderBoardSpeed();
+        }
+        if(hs_repel==-1){
+            loadScoreOfLeaderBoardScoreRepel();
+        }
+        if(hv_repel==-1){
+            loadScoreOfLeaderBoardSpeedRepel();
         }
         if(sceneManager.getCurrentScene()== SceneManager.AllScenes.MENU || sceneManager.getCurrentScene()== SceneManager.AllScenes.FINISH){
 
@@ -324,15 +333,13 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.d(TAG, "onConnectionSuspended(): attempting to connect");
+
         mGoogleApiClient.connect();
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d(TAG, "onConnectionFailed(): attempting to resolve");
         if (mResolvingConnectionFailure) {
-            Log.d(TAG, "onConnectionFailed(): already resolving");
             return;
         }
 
@@ -399,23 +406,27 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
+
         if (requestCode == RC_SIGN_IN) {
             mSignInClicked = false;
             mResolvingConnectionFailure = false;
             if (resultCode == RESULT_OK) {
                 mGoogleApiClient.connect();
             } else {
-                mGoogleApiClient=null;
+                //mGoogleApiClient=null;
                 mAutoStartSignInFlow = true;
                 mSignInClicked = true;
                 mResolvingConnectionFailure = false;
+                if(resultCode!=0)
+                BaseGameUtils.makeSimpleDialog(this, "Failed to sign in. Please check your network connection and try again.").show();
+                SharedPreferences.Editor e = getSharedPreferences("GAME",0).edit();
+                e.putString("SignedIn","false");
+                e.commit();
                 if(sceneManager.getCurrentScene()== SceneManager.AllScenes.MENU || sceneManager.getCurrentScene()== SceneManager.AllScenes.FINISH){
 
                 }
                 else {
-                    SharedPreferences.Editor e = getSharedPreferences("GAME",0).edit();
-                    e.putString("SignedIn","false");
-                    e.commit();
+
                     startGame();
                 }
             }
@@ -483,6 +494,36 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
                     SharedPreferences example = getSharedPreferences("GAME", 0);
                     SharedPreferences.Editor editor = example.edit();
                     editor.putString("HighSpeed", scoreResult.getScore().getRawScore() + "");
+                    editor.commit();
+                }
+            }
+        });
+    }
+    private void loadScoreOfLeaderBoardScoreRepel() {
+        Games.Leaderboards.loadCurrentPlayerLeaderboardScore(mGoogleApiClient, getString(R.string.leaderboard_scorerepel_mode), LeaderboardVariant.TIME_SPAN_ALL_TIME, LeaderboardVariant.COLLECTION_PUBLIC).setResultCallback(new ResultCallback<Leaderboards.LoadPlayerScoreResult>() {
+            @Override
+            public void onResult(final Leaderboards.LoadPlayerScoreResult scoreResult) {
+                if (isScoreResultValid(scoreResult)) {
+                    // here you can get the score like this
+                    //mPoints = scoreResult.getScore().getRawScore();
+                    SharedPreferences example = getSharedPreferences("GAME", 0);
+                    SharedPreferences.Editor editor = example.edit();
+                    editor.putString("HighScoreRepel", scoreResult.getScore().getRawScore() + "");
+                    editor.commit();
+                }
+            }
+        });
+    }
+    private void loadScoreOfLeaderBoardSpeedRepel() {
+        Games.Leaderboards.loadCurrentPlayerLeaderboardScore(mGoogleApiClient, getString(R.string.leaderboard_speedrepel_mode), LeaderboardVariant.TIME_SPAN_ALL_TIME, LeaderboardVariant.COLLECTION_PUBLIC).setResultCallback(new ResultCallback<Leaderboards.LoadPlayerScoreResult>() {
+            @Override
+            public void onResult(final Leaderboards.LoadPlayerScoreResult scoreResult) {
+                if (isScoreResultValid(scoreResult)) {
+                    // here you can get the score like this
+                    //mPoints = scoreResult.getScore().getRawScore();
+                    SharedPreferences example = getSharedPreferences("GAME", 0);
+                    SharedPreferences.Editor editor = example.edit();
+                    editor.putString("HighSpeedRepel", scoreResult.getScore().getRawScore() + "");
                     editor.commit();
                 }
             }
