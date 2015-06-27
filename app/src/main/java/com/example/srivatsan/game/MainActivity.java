@@ -23,6 +23,7 @@ import com.google.android.gms.games.leaderboard.LeaderboardVariant;
 import com.google.android.gms.games.leaderboard.Leaderboards;
 import com.google.android.gms.plus.Plus;
 import com.google.example.games.basegameutils.BaseGameUtils;
+import com.iinmobi.adsdk.AdSdk;
 
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.options.EngineOptions;
@@ -92,6 +93,10 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
 
         // Load ads into Banner Ads
         adView.loadAd(adRequest);
+
+        //AdSdk.getInstance().start(this);
+        //AdSdk.getInstance().setGooglePlayApp();
+        //AdSdk.getInstance().setPub("demo@Pub");
 
         SharedPreferences prefs = getSharedPreferences("GAME", 0);
         BannerListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
@@ -196,6 +201,9 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
 
         if(mGoogleApiClient!=null && s.getString("SignedIn","false").equals("true"))
             mGoogleApiClient.connect();
+
+        //AdSdk.getInstance().activityStart(this);
+        //AdSdk.getInstance().showPopAdvertising("demo@Pub");
     }
     @Override
     protected void onDestroy(){
@@ -211,6 +219,8 @@ public class MainActivity extends LayoutGameActivity implements GoogleApiClient.
             if (mGoogleApiClient.isConnected()) {
                 mGoogleApiClient.disconnect();
             }
+
+        AdSdk.getInstance().activityStop(this);
     }
     Camera mCamera;
     @Override
